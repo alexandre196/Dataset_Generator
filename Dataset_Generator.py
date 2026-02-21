@@ -1,101 +1,110 @@
 import os
+import tkinter as tk
+from tkinter import messagebox
 import customtkinter as ctk
 from icrawler.builtin import BingImageCrawler
 from PIL import Image
 
-# --- CONFIGURATION ANONYME ET AUTOMATIQUE ---
-# On récupère le dossier où est enregistré ce script .py
-SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
-# On crée un dossier "dataset_output" dans ce même dossier
-BASE_PATH = os.path.join(SCRIPT_DIR, "dataset_output")
+# Set appearance mode and color theme
+ctk.set_appearance_mode("Dark")
+ctk.set_default_color_theme("blue")
 
-class DatasetInterface(ctk.CTk):
+class DatasetGenerator(ctk.CTk):
     def __init__(self):
         super().__init__()
 
-        self.title("Dataset Generator - Version Open Source")
+        # Window Configuration
+        self.title("AI Dataset Generator - Version 1.0")
         self.geometry("600x550")
-        ctk.set_appearance_mode("dark")
-        ctk.set_default_color_theme("blue")
 
-        # Initialisation du dossier racine
-        os.makedirs(BASE_PATH, exist_ok=True)
-
-        # --- Interface Graphique ---
-        self.label_title = ctk.CTkLabel(self, text="🛠️ GÉNÉRATEUR DE DATASET", font=("Arial", 24, "bold"))
+        # UI Layout
+        self.label_title = ctk.CTkLabel(self, text="IMAGE DATASET GENERATOR", font=("Roboto", 24, "bold"))
         self.label_title.pack(pady=20)
 
-        self.query_entry = ctk.CTkEntry(self, placeholder_text="Que chercher ? (ex: drone, oiseau...)", width=400)
-        self.query_entry.pack(pady=10)
+        # Keyword Entry
+        self.entry_keyword = ctk.CTkEntry(self, placeholder_text="Enter keyword (e.g., 'drone', 'vintage car')", width=350)
+        self.entry_keyword.pack(pady=15)
 
-        self.count_label = ctk.CTkLabel(self, text="Nombre d'images à télécharger :")
-        self.count_label.pack(pady=5)
-        self.count_spinbox = ctk.CTkEntry(self, width=100)
-        self.count_spinbox.insert(0, "50")
-        self.count_spinbox.pack(pady=5)
+        # Image Count
+        self.label_count = ctk.CTkLabel(self, text="Number of images to download:")
+        self.label_count.pack(pady=5)
+        self.entry_count = ctk.CTkEntry(self, width=100)
+        self.entry_count.insert(0, "50")
+        self.entry_count.pack(pady=5)
 
-        self.res_label = ctk.CTkLabel(self, text="Résolution de sortie (Carré) :")
-        self.res_label.pack(pady=5)
-        self.res_combo = ctk.CTkComboBox(self, values=["416", "640", "1024", "1280"])
-        self.res_combo.set("640")
-        self.res_combo.pack(pady=5)
+        # Resolution Selection
+        self.label_res = ctk.CTkLabel(self, text="Output Resolution (Square):")
+        self.label_res.pack(pady=5)
+        self.combo_res = ctk.CTkComboBox(self, values=["416", "640", "1024", "1280"])
+        self.combo_res.set("1024")
+        self.combo_res.pack(pady=5)
 
-        self.download_btn = ctk.CTkButton(self, text="LANCER LA RÉCUPÉRATION", command=self.run_task, 
-                                          font=("Arial", 16, "bold"), height=40, fg_color="#27ae60", hover_color="#2ecc71")
-        self.download_btn.pack(pady=30)
+        # Action Button
+        self.btn_run = ctk.CTkButton(self, text="START DOWNLOAD & PROCESS", 
+                                     fg_color="#2ecc71", hover_color="#27ae60", 
+                                     command=self.run_generator)
+        self.btn_run.pack(pady=30)
 
-        self.status_label = ctk.CTkLabel(self, text=f"Dossier : {BASE_PATH}", text_color="gray", font=("Arial", 10))
-        self.status_label.pack(pady=10)
+        # Status and Footer
+        self.label_status = ctk.CTkLabel(self, text="Status: Ready", font=("Roboto", 11, "italic"))
+        self.label_status.pack(pady=10)
 
-    def run_task(self):
-        query = self.query_entry.get()
-        try:
-            count = int(self.count_spinbox.get())
-            size = int(self.res_combo.get())
-        except ValueError:
-            self.status_label.configure(text="❌ Erreur: Nombre invalide !", text_color="red")
-            return
-        
-        if not query:
-            self.status_label.configure(text="❌ Erreur: Entre un mot-clé !", text_color="red")
-            return
+        self.footer = ctk.CTkLabel(self, text="Images will be saved in 'dataset_output/' folder", font=("Roboto", 10))
+        self.footer.pack(side="bottom", pady=10)
 
-        self.status_label.configure(text=f"⏳ Téléchargement de '{query}'...", text_color="yellow")
-        self.update()
+    def process_images(self, raw_dir, processed_dir, size):
+        """Resizes images to square and converts to RGB."""
+        if not os.path.exists(processed_dir):
+            os.makedirs(processed_dir)
 
-        # Organisation des sous-dossiers
-        clean_name = query.replace(" ", "_").lower()
-        folder_path = os.path.join(BASE_PATH, clean_name)
-        raw_dir = os.path.join(folder_path, "raw")
-        proc_dir = os.path.join(folder_path, "processed")
-
-        for d in [raw_dir, proc_dir]:
-            os.makedirs(d, exist_ok=True)
-
-        # Téléchargement via Bing
-        crawler = BingImageCrawler(storage={'root_dir': raw_dir})
-        crawler.crawl(keyword=query, max_num=count)
-
-        # Traitement des images
-        self.status_label.configure(text="✂️ Recadrage et redimensionnement...", text_color="cyan")
-        self.update()
-
-        processed_count = 0
         for filename in os.listdir(raw_dir):
             try:
-                raw_file_path = os.path.join(raw_dir, filename)
-                with Image.open(raw_file_path) as img:
+                with Image.open(os.path.join(raw_dir, filename)) as img:
                     img = img.convert("RGB")
-                    # Redimensionnement haute qualité
-                    img_res = img.resize((size, size), Image.Resampling.LANCZOS)
-                    save_path = os.path.join(proc_dir, f"{clean_name}_{processed_count:04d}.jpg")
-                    img_res.save(save_path, "JPEG")
-                    processed_count += 1
-            except Exception:
-                continue
+                    img = img.resize((size, size), Image.Resampling.LANCZOS)
+                    img.save(os.path.join(processed_dir, filename), "JPEG")
+            except Exception as e:
+                print(f"Error processing {filename}: {e}")
 
-        self.status_label.configure(text=f"✅ Terminé ! {processed_count} images prêtes.", text_color="green")
+    def run_generator(self):
+        keyword = self.entry_keyword.get()
+        count = int(self.entry_count.get())
+        res = int(self.combo_res.get())
+
+        if not keyword:
+            messagebox.showwarning("Input Error", "Please enter a keyword.")
+            return
+
+        # Path management
+        base_dir = "dataset_output"
+        raw_dir = os.path.join(base_dir, keyword, "raw")
+        processed_dir = os.path.join(base_dir, keyword, "processed")
+
+        self.label_status.configure(text=f"Status: Downloading {keyword}...", text_color="yellow")
+        self.update()
+
+        try:
+            # 1. Scraping images
+            crawler = BingImageCrawler(storage={'root_dir': raw_dir})
+            crawler.crawl(keyword=keyword, max_num=count)
+
+            # 2. Processing images
+            self.label_status.configure(text="Status: Processing images (Resizing)...")
+            self.update()
+            self.process_images(raw_dir, processed_dir, res)
+
+            # 3. Success
+            self.label_status.configure(text="Status: Successfully completed!", text_color="#2ecc71")
+            messagebox.showinfo("Success", f"Dataset created for '{keyword}'!")
+            
+            # Change button to allow opening the folder
+            self.btn_run.configure(text="OPEN OUTPUT FOLDER", fg_color="#3498db", 
+                                    command=lambda: os.startfile(os.path.realpath(processed_dir)))
+
+        except Exception as e:
+            self.label_status.configure(text="Status: An error occurred", text_color="red")
+            messagebox.showerror("Error", str(e))
 
 if __name__ == "__main__":
-    app = DatasetInterface()
+    app = DatasetGenerator()
     app.mainloop()
