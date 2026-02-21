@@ -1,32 +1,34 @@
 # 🛠️ Image Dataset Generator
 
-Un outil simple et efficace avec interface graphique pour créer rapidement des datasets d'images pour l'IA (YOLO, Stable Diffusion, etc.). Il télécharge des images via Bing et les prépare automatiquement au format carré.
+A simple and efficient GUI-based tool to quickly create image datasets for AI training (YOLO, Stable Diffusion, etc.). It automates image downloading via Bing and performs square-format preprocessing.
 
-## ✨ Fonctionnalités
-* **Recherche automatisée** : Utilise `icrawler` pour récupérer des images sur Bing.
-* **Prétraitement automatique** : Conversion en RGB et redimensionnement carré (416, 640, 1024, etc.).
-* **Interface intuitive** : Créée avec `customtkinter` pour un mode sombre moderne.
-* **Organisation propre** : Sépare les images brutes (`raw`) des images prêtes (`processed`).
+![Interface Preview](preview.png)
+
+## ✨ Features
+* **Automated Search**: Uses `icrawler` to retrieve images from Bing.
+* **Automatic Preprocessing**: Converts images to RGB and resizes them to square dimensions (416, 640, 1024, etc.).
+* **Modern Interface**: Built with `customtkinter` for a sleek dark mode experience.
+* **Clean Organization**: Automatically separates raw images (`raw`) from ready-to-use images (`processed`).
 
 ## 🚀 Installation
 
-1. Clonez le dépôt :
+1. Clone the repository:
 ```bash
-git clone [https://github.com/TON_NOM_UTILISATEUR/TON_DEPOT.git](https://github.com/TON_NOM_UTILISATEUR/TON_DEPOT.git)
-Installez les dépendances nécessaires :
+git clone [https://github.com/alexandre196/Dataset_Generator.git](https://github.com/alexandre196/Dataset_Generator.git)
+Install the required dependencies:
 
 Bash
 pip install customtkinter icrawler Pillow
-📋 Utilisation
-Lancez le script : python Dataset_Generator.py
+📋 How to Use
+Run the script: python Dataset_Generator.py
 
-Entrez votre mot-clé (ex: "drones").
+Enter your keyword (e.g., "drones").
 
-Choisissez le nombre d'images et la résolution.
+Select the number of images and the desired resolution.
 
-Cliquez sur LANCER LA RÉCUPÉRATION.
+Click on LANCER LA RÉCUPÉRATION (Start Download).
 
-Les images apparaîtront dans le dossier dataset_output/.
+The images will be saved in the dataset_output/ folder.
 
-⚖️ Licence & Responsabilité
-Cet outil est destiné à un usage éducatif et de recherche. L'utilisateur est responsable de vérifier les droits d'utilisation des images téléchargées.
+⚖️ License & Responsibility
+This tool is intended for educational and research purposes. The user is responsible for verifying the usage rights of the downloaded images.
