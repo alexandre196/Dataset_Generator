@@ -1,5 +1,13 @@
-# Dossiers générés par le script
+# Dossiers de données (ignore tout le contenu de ces dossiers, peu importe où ils sont)
 **/raw/
 **/processed/
 **/augmented/
 **/simple_images/
+dataset_output/
+
+# Fichiers Python inutiles sur GitHub
+__pycache__/
+*.pyc
+
+# Variables d'environnement (si tu en crées)
+.env
